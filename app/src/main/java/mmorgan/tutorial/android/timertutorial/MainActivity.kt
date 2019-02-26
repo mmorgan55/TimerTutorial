@@ -8,6 +8,8 @@ import android.view.Menu
 import android.view.MenuItem
 
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
+import mmorgan.tutorial.android.timertutorial.util.PrefUtil
 
 class MainActivity : AppCompatActivity() {
 
@@ -54,6 +56,60 @@ class MainActivity : AppCompatActivity() {
         } else if (timerState == TimerState.Paused) {
 
         }
+
+        PrefUtil.setPreviousTimerLengthSeconds(timerLengthSeconds, this)
+        PrefUtil.setSecondsRemaining(secondsRemaining, this)
+        PrefUtil.setTimerState(timerState, this)
+    }
+
+    private fun initTimer() {
+        timerState = PrefUtil.getTimerState(this)
+
+        if(timerState == TimerState.Stopped) {
+            setNewTimerLength()
+        } else {
+            setPreviousTimerLength()
+        }
+
+        secondsRemaining = if(timerState == TimerState.Running || timerState == TimerState.Paused) {
+            PrefUtil.getSecondsRemaining(this)
+        } else {
+            timerLengthSeconds
+        }
+
+        if (timerState == TimerState.Running) {
+            startTimer()
+        }
+
+        updateButtons()
+        updateCountdownUI()
+    }
+
+    private fun onTimerFinished() {
+        timerState = TimerState.Stopped
+
+        setNewTimerLength()
+
+        progress_countdown.progress = 0
+
+        PrefUtil.setSecondsRemaining(timerLengthSeconds, this)
+        secondsRemaining - timerLengthSeconds
+
+        updateButtons()
+        updateCountdownUI()
+    }
+
+    private fun startTimer() {
+        timerState = TimerState.Running
+
+        timer = object : CountDownTimer(secondsRemaining * 1000, 1000) {
+            override fun onFinish() = onTimerFinished()
+
+            override fun onTick(millisUntilFinished: Long) {
+                secondsRemaining = millisUntilFinished / 1000
+                updateCountdownUI()
+            }
+        }.start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

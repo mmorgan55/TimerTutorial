@@ -25,7 +25,7 @@ class PrefUtil {
             editor.putLong(PREVIOUS_TIMER_LENGTH_SECONDS_ID, seconds)
             editor.apply()
         }
-        
+
         fun getTimerState(context: Context): MainActivity.TimerState {
             val preferences = PreferenceManager.getDefaultSharedPreferences(context)
             val ordinal = preferences.getInt(TIMER_STATE_ID, 0)
